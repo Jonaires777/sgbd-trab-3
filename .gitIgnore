@@ -1,0 +1,39 @@
+# Ignore bin and obj folders
+bin/
+obj/
+
+# Ignore Visual Studio user-specific files
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Ignore build results
+*.dll
+*.exe
+*.pdb
+*.app
+*.db
+*.log
+
+# Ignore the Results folder
+Results/
+
+# Ignore temporary files
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+Thumbs.db
+
+# Ignore ReSharper files
+_ReSharper*/
+*.DotSettings.user
+
+# Ignore Rider IDE files
+.idea/
+
+# Ignore test result files
+TestResults/
