@@ -1,6 +1,9 @@
-﻿
-using transaction_manager.Models;
+﻿using transaction_manager.Models;
 using transaction_manager.Operations;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 class Program
 {
@@ -11,7 +14,7 @@ class Program
         string resultsDir = Path.Combine(projectRoot, "Results");
         Directory.CreateDirectory(resultsDir);
 
-        var lines = File.ReadAllLines("in.txt");
+        var lines = File.ReadAllLines(Path.Combine(projectRoot, "in.txt"));
         var dataItems = lines[0].TrimEnd(';').Split(',').Select(s => s.Trim()).ToList();
         var transactions = lines[1].TrimEnd(';').Split(',').Select(s => s.Trim()).ToList();
         var timestamps = lines[2].TrimEnd(';').Split(',').Select(int.Parse).ToList();
@@ -22,6 +25,10 @@ class Program
 
         var output = new List<string>();
 
+        var dataTS = new Dictionary<string, DataItemInfo>();
+        foreach (var item in dataItems)
+            dataTS[item] = new DataItemInfo();
+
         for (int i = 3; i < lines.Length; i++)
         {
             string line = lines[i];
@@ -31,10 +38,6 @@ class Program
             var ops = ParseOperations.Parse(scheduleRaw);
             bool rollback = false;
             var moment = 0;
-
-            var dataTS = new Dictionary<string, DataItemInfo>();
-            foreach (var item in dataItems)
-                dataTS[item] = new DataItemInfo();
 
             foreach (var op in ops)
             {
@@ -56,7 +59,11 @@ class Program
                         rollback = true;
                         break;
                     }
-                    itemInfo.ReadTS = Math.Max(itemInfo.ReadTS, ts);
+                    else
+                    {
+                        if (itemInfo.ReadTS < ts)
+                            itemInfo.ReadTS = ts;
+                    }
                 }
                 else if (op.Type == "w")
                 {
@@ -66,7 +73,10 @@ class Program
                         rollback = true;
                         break;
                     }
-                    itemInfo.WriteTS = ts;
+                    else
+                    {
+                        itemInfo.WriteTS = ts;
+                    }
                 }
             }
 
