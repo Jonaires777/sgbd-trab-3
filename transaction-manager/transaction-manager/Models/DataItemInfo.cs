@@ -8,7 +8,7 @@ namespace transaction_manager.Models
 {
     public class DataItemInfo
     {
-        public int ReadTS = -1;
-        public int WriteTS = -1;
+        public int ReadTS = 0;  
+        public int WriteTS = 0; 
     }
 }

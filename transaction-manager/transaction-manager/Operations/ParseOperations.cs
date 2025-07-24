@@ -1,29 +1,49 @@
-﻿using System;
+﻿using transaction_manager.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using transaction_manager.Models;
 
 namespace transaction_manager.Operations
 {
-    public class ParseOperations
+    public static class ParseOperations
     {
-        public static List<Operation> Parse(string raw)
+        public static List<Operation> Parse(string schedule, List<string> transactionNames)
         {
-            var ops = new List<Operation>();
-            var regex = new Regex(@"([rw|c])(\d)(?:\(([A-Z])\))?");
-            foreach (Match match in regex.Matches(raw))
+            var operations = new List<Operation>();
+            // Regex melhorada para capturar melhor as operações
+            var matches = Regex.Matches(schedule, @"([rw])(\d+)\(([A-Z])\)|c(\d*)");
+
+            foreach (Match match in matches)
             {
-                ops.Add(new Operation
+                if (match.Value.StartsWith("c"))
                 {
-                    Type = match.Groups[1].Value,
-                    TransactionId = int.Parse(match.Groups[2].Value),
-                    DataItem = match.Groups[3].Success ? match.Groups[3].Value : ""
-                });
+                    operations.Add(new Operation
+                    {
+                        Type = "c",
+                        DataItem = string.Empty,
+                        TransactionName = "" // pode ser ignorado
+                    });
+                }
+                else
+                {
+                    var type = match.Groups[1].Value;
+                    var transactionId = int.Parse(match.Groups[2].Value);
+                    var dataItem = match.Groups[3].Value;
+
+                    // Verificar se o transactionId está dentro do range válido
+                    if (transactionId <= transactionNames.Count)
+                    {
+                        string transactionName = transactionNames[transactionId - 1];
+
+                        operations.Add(new Operation
+                        {
+                            Type = type,
+                            DataItem = dataItem,
+                            TransactionName = transactionName
+                        });
+                    }
+                }
             }
-            return ops;
+            return operations;
         }
     }
 }
